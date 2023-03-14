@@ -1,0 +1,8 @@
+{{ metadata.title }}
+{{ metadata.content }}
+
+{% for category in array_array %}
+{% for item in category %}
+<li> {{ item }}</li>
+{% endfor %}
+{% endfor %}

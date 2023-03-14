@@ -1,0 +1,15 @@
+# Gitlab ci-cd variables
+# Ce fichier content toutes les variables environment de notre projet
+
+variables:
+
+  # Gradle options
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+  # Project variables
+  APP_NAME: "panda-parser"
+  MAIN_CLASS_PATH: "fr.uparis.pandaparser.application.Application"
+  JAR_PATH: "build/libs"
+  JOB_ID_DIR: "job-id"
+  PROJECT_URL: "https://gaufre.informatique.univ-paris-diderot.fr/bouldja/SSG/"
+  LIBS_PATH: "libs"

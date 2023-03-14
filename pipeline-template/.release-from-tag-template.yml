@@ -1,0 +1,16 @@
+.release-from-tag-template:
+  script:
+    - |
+      # printing job information
+      echo "───────────────┬──────────────────────────────────────┬────────────────"
+      echo "    Variables  │ Description                          │  Values        "
+      echo "───────────────┼──────────────────────────────────────┼────────────────"
+      echo "  TAG_NAME     │ release version                      │  $CI_COMMIT_TAG    "
+      echo "───────────────┴──────────────────────────────────────┴────────────────"
+      echo "$$ARTIFECTS_URL"
+    - |
+      curl --request POST \
+           --header "PRIVATE-TOKEN: $PANDA_PARSER_TOKEN" \
+           --data name="$BINARY_NAME" \
+           --data url=$ARTIFECTS_URL \
+           https://gaufre.informatique.univ-paris-diderot.fr/api/v4/projects/${CI_PROJECT_ID}/releases/${CI_COMMIT_TAG}/assets/links

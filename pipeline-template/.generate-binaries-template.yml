@@ -1,0 +1,28 @@
+.generate-binaries-template:
+  script:
+    - |
+      # printing job information
+      echo "───────────────┬──────────────────────────────────────┬────────────────"
+      echo "    Variables  │ Description                          │  Values        "
+      echo "───────────────┼──────────────────────────────────────┼────────────────"
+      echo "    APP_NAME   │ application name                     │  $APP_NAME     "
+      echo "───────────────┼──────────────────────────────────────┼────────────────"
+      echo "    JAR_PATH   │ chemin vers de le jar                │  $JAR_PATH     "
+      echo "───────────────┼──────────────────────────────────────┼────────────────"
+      echo "    LIBS_PATH  │ chemin vers les libraries utilisées  │  $LIBS_PATH    "
+      echo "───────────────┴──────────────────────────────────────┴────────────────"
+    - mkdir $BINARIES_DIR
+    - cd $BINARIES_DIR
+    - mkdir -p $LIBS_PATH
+    - cp "../$JAR_PATH/$APP_NAME.jar" $LIBS_PATH
+    - |
+      # create script
+      echo 'ARGS=""' > $SCRIPT_NAME
+      echo -e '\tfor arg in "$@"; do' >> $SCRIPT_NAME
+      echo -e '\tARGS="$ARGS $arg"' >> $SCRIPT_NAME
+      echo 'done' >> $SCRIPT_NAME
+      export CLASS_PATHS=$(for name in $(ls -1 $LIBS_PATH); do echo "$LIBS_PATH/$name"; done | tr '\n' ':')"$MAIN_JAR"
+      echo java -cp "$CLASS_PATHS" $MAIN_CLASS_PATH '$ARGS'>> $SCRIPT_NAME
+  artifacts:
+    paths:
+      - $BINARIES_DIR

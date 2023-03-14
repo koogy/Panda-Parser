@@ -1,0 +1,107 @@
+# CI - CD
+# Voir aussi :
+#   - https://gradle.org/
+#   - https://github.com/gradle/gradle
+#   - https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Gradle.gitlab-ci.yml
+
+# inclure les variables et les modèles
+include:
+  - local: .gitlab-ci-variables.yml
+  - local: pipeline-template/.generate-binaries-template.yml
+  - local: pipeline-template/.release-from-tag-template.yml
+
+# gradle Image - par default
+image: gradle:alpine
+
+# Les stages à exécuter
+stages:
+  - build
+  - test
+  - binaries
+  - release
+
+# export env variables
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
+# build job - compilation de projet
+build:
+  stage: build
+  script:
+    - gradle --build-cache assemble
+  artifacts:
+    paths:
+      - build
+
+# test reports job - verifier si tous les tests sont bien passés & jacoco conerag
+test:
+  stage: test
+  script:
+    - gradle test
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/TEST-*.xml
+
+coverage:
+  stage: test
+  script:
+    - gradle test jacocoTestReport
+    - cat build/jacocoHtml/index.html | grep -o '<tfoot>.*</tfoot>'
+
+
+###################################################
+##   CREATE DISTRIBUTION - for windows & linux   ##
+###################################################
+
+linux-macOS-binary:
+  stage: binaries
+  extends: .generate-binaries-template
+  variables:
+    BINARIES_DIR: "linux-macOS-binary"
+    SCRIPT_NAME: $APP_NAME
+  only:
+    - tags
+
+windows-binary:
+  stage: binaries
+  extends: .generate-binaries-template
+  variables:
+    BINARIES_DIR: "windows-binary"
+    SCRIPT_NAME: "$APP_NAME.bat"
+  only:
+    - tags
+
+
+
+#######################################
+##   RELEASES - for linux & windows  ##
+#######################################
+
+linux-macOs-release:
+  stage: release
+  image: docker:stable
+  extends: .release-from-tag-template
+  variables:
+    OS: "linux-macOS"
+    BINARY_NAME: "$APP_NAME-linux-macOs-$CI_COMMIT_TAG"
+  before_script:
+    - apk add --update curl && rm -rf /var/cache/apk/*
+    - export BINARY_JOB_ID=$(($CI_JOB_ID - 2))
+    - export ARTIFECTS_URL="$PROJECT_URL-/jobs/$BINARY_JOB_ID/artifacts/download?job=linux-macOs-binary"
+  only:
+    - tags
+
+windows-release:
+  stage: release
+  image: docker:stable
+  extends: .release-from-tag-template
+  variables:
+    OS: "windows"
+    BINARY_NAME: "$APP_NAME-windows-$CI_COMMIT_TAG"
+  before_script:
+    - apk add --update curl && rm -rf /var/cache/apk/*
+    - export BINARY_JOB_ID=$(($CI_JOB_ID - 2))
+    - export ARTIFECTS_URL="$PROJECT_URL-/jobs/$BINARY_JOB_ID/artifacts/download?job=windows-binary"
+  only:
+    - tags

@@ -1,0 +1,23 @@
+###############################################
+##  Local script (basic) to run the project  ##
+###############################################
+
+# Commande java pour exécuter l'application (ajouter des option jvm ?)
+JAVA_CMD=java
+
+MAIN_JAR=build/libs/panda-parser.jar
+
+
+# Stocker les arguments dans ARGS
+ARGS=""
+for arg in "$@"; do
+  # add arg to args
+  ARGS="$ARGS $arg"
+done
+
+# Compilation - to delete ?
+#gradle --warning-mode all  build > /dev/null
+
+
+# Execution
+exec "$JAVA_CMD" -jar $MAIN_JAR $ARGS

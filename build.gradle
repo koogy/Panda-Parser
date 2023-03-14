@@ -1,0 +1,77 @@
+plugins {
+    id 'application'
+    id 'jacoco'
+}
+
+group 'uparis.panda-parser'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // Junit
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
+
+
+    // commonmark-java
+    implementation 'org.commonmark:commonmark:0.18.1'
+    implementation 'info.picocli:picocli:4.6.3'
+    implementation 'org.commonmark:commonmark-ext-gfm-tables:0.18.2'
+    implementation 'org.commonmark:commonmark-ext-gfm-strikethrough:0.18.2'
+
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+    // A HTML Checker (Home page -> http://jtidy.sourceforge.net/)
+    implementation 'jtidy:jtidy:4aug2000r7-dev'
+
+    //get extension
+    implementation 'org.apache.commons:commons-io:1.3.2'
+
+    // add 'io.netty:netty-all:4.1.75.Final'
+    implementation 'io.netty:netty-all:4.1.75.Final'
+
+    // add tomlj
+    implementation 'org.tomlj:tomlj:1.0.0'
+
+    // jinjava
+    implementation 'com.hubspot.jinjava:jinjava:2.6.0'
+}
+
+test {
+    finalizedBy jacocoTestReport // report is always generated after tests run
+    useJUnitPlatform()
+}
+
+jacoco {
+    toolVersion = "0.8.7"
+    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir') as Directory
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+}
+
+application {
+    mainClass = 'fr.uparis.pandaparser.Application'
+}
+
+jar {
+    manifest { attributes('Main-Class': 'fr.uparis.pandaparser.application.Application') }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}

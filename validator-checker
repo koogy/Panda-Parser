@@ -1,0 +1,12 @@
+#
+#Récuperer le docker avec le validator
+docker pull ghcr.io/validator/validator:latest
+
+#Démarrer le serveur pour le validator
+docker run -it --rm -p 8888:8888 ghcr.io/validator/validator:latest
+
+#Dans le navigateur, taper l'addresse pour acceder au validateur :
+http://localhost:8888/
+
+#Si vous ne voulez pas lancer le serveur localement, vous pouvez aller directement a cette addresse :
+https://validator.w3.org/#validate_by_uri
